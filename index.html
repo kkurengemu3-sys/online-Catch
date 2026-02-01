@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Second Online</title>
+
 <style>
   body {
     margin: 0;
@@ -11,34 +12,38 @@
     text-align: center;
   }
 
+  /* ヘッダー */
   .header {
     background: #bff7f7;
     padding: 12px 0 6px;
     font-weight: bold;
   }
-
   .header .title {
     font-size: 28px;
   }
-
   .header .sub {
     font-size: 14px;
   }
 
-  /* ゲーム画面 */
+  /* 黒いゲーム画面 */
   .game {
     background: #000;
     height: 320px;
     position: relative;
+    overflow: hidden;
   }
 
-  iframe {
+  /* 映像を黒枠いっぱいに */
+  .game iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     border: none;
   }
 
-  /* 情報 */
+  /* 情報エリア */
   .info {
     display: flex;
     justify-content: space-between;
@@ -68,7 +73,7 @@
   .controls {
     display: flex;
     justify-content: space-around;
-    margin-top: 30px;
+    margin: 25px 0;
   }
 
   .ctrl-btn {
@@ -82,9 +87,11 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    user-select: none;
   }
 </style>
 </head>
+
 <body>
 
 <div class="header">
@@ -92,8 +99,13 @@
   <div class="sub">セカンド・エンターテイメント</div>
 </div>
 
+<!-- ゲーム画面 -->
 <div class="game">
-  <iframe id="camera" src="https://192.168.11.28:8080"></iframe>
+  <iframe
+    id="camera"
+    src="https://192.168.11.28:8080"
+    allow="autoplay">
+  </iframe>
 </div>
 
 <div class="info">
