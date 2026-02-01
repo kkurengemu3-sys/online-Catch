@@ -1,127 +1,144 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<title>Second Online</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Second Online - クレーン操作</title>
+    <style>
+        body { margin: 0; background: #fff; font-family: "Arial Black", sans-serif; overflow: hidden; touch-action: manipulation; text-align: center; }
+        
+        /* ヘッダーデザイン */
+        .header { background: #b2ebf2; padding: 10px 0; border-bottom: 2px solid #333; }
+        .logo-main { font-size: 24px; color: #000; margin: 0; line-height: 1; }
+        .logo-sub { font-size: 10px; color: #000; margin: 5px 0 0 0; }
 
-<style>
-  body {
-    margin: 0;
-    font-family: sans-serif;
-    background: #fff;
-    text-align: center;
-  }
+        /* 映像エリア（黒背景） */
+        .video-container { width: 100%; aspect-ratio: 4 / 3; background: #000; display: flex; justify-content: center; align-items: center; }
+        #camera-stream { width: 100%; height: 100%; object-fit: contain; }
 
-  .header {
-    background: #bff7f7;
-    padding: 12px 0 6px;
-    font-weight: bold;
-  }
-  .header .title { font-size: 28px; }
-  .header .sub { font-size: 14px; }
+        /* 情報エリア */
+        .info-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; }
+        .price { font-size: 24px; font-weight: bold; }
 
-  /* 黒いゲーム画面 */
-  .game {
-    background: #000;
-    height: 320px;
-    position: relative;
-    overflow: hidden;
-  }
+        /* カメラ切り替えボタン */
+        .camera-switch { display: flex; gap: 5px; }
+        .sw-btn { 
+            padding: 8px 20px; font-size: 18px; font-weight: bold; border: none; cursor: pointer;
+            border-radius: 2px; color: #000; width: 70px;
+        }
+        .sw-btn.mae { background: #29b6f6; } /* 青色 */
+        .sw-btn.yoko { background: #bdbdbd; } /* 灰色 */
+        .sw-btn.active { outline: 3px solid #000; }
 
-  /* 映像のみを全面表示 */
-  .camera {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* 黒枠いっぱい */
-  }
+        /* 操作ボタンエリア */
+        .controls { display: flex; justify-content: space-around; padding-top: 50px; }
+        .move-btn { 
+            width: 120px; height: 120px; border-radius: 50%; border: 3px solid #000;
+            background: #b2ebf2; display: flex; justify-content: center; align-items: center;
+            font-size: 60px; color: #000; outline: none; cursor: pointer;
+            -webkit-tap-highlight-color: transparent; transition: transform 0.1s;
+        }
+        .move-btn:active { transform: scale(1.1); background: #80deea; }
+        .move-btn.disabled { opacity: 0.3; cursor: not-allowed; }
 
-  .info {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 20px;
-    font-size: 24px;
-    font-weight: bold;
-  }
-
-  .mode-btns button {
-    font-size: 18px;
-    padding: 6px 18px;
-    margin-left: 5px;
-    border: none;
-    cursor: pointer;
-  }
-
-  .on { background: #4cc3ff; }
-  .off { background: #bdbdbd; }
-
-  .controls {
-    display: flex;
-    justify-content: space-around;
-    margin: 25px 0;
-  }
-
-  .ctrl-btn {
-    width: 110px;
-    height: 110px;
-    border-radius: 50%;
-    background: #bff7f7;
-    border: 5px solid #000;
-    font-size: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-</style>
+        /* 命令送信用隠しiframe */
+        #cmd-frame { display: none; }
+    </style>
 </head>
-
 <body>
 
-<div class="header">
-  <div class="title">Second Online</div>
-  <div class="sub">セカンド・エンターテイメント</div>
-</div>
+    <div class="header">
+        <h1 class="logo-main">Second Online</h1>
+        <p class="logo-sub">セカンド・エンターテイメント</p>
+    </div>
 
-<!-- 黒枠＋映像だけ -->
-<div class="game">
-  <img
-    id="camera"
-    class="camera"
-    src="http://192.168.11.28:8080/video"
-    alt="camera">
-</div>
+    <div class="video-container">
+        <img id="camera-stream" src="" alt="カメラ接続中...">
+    </div>
 
-<div class="info">
-  <div>1Play100SP</div>
-  <div class="mode-btns">
-    <button id="frontBtn" class="on" onclick="setFront()">まえ</button>
-    <button id="sideBtn" class="off" onclick="setSide()">よこ</button>
-  </div>
-</div>
+    <div class="info-bar">
+        <div class="price">1Play100SP</div>
+        <div class="camera-switch">
+            <button id="sw-mae" class="sw-btn mae active" onclick="switchCamera('mae')">まえ</button>
+            <button id="sw-yoko" class="sw-btn yoko" onclick="switchCamera('yoko')">よこ</button>
+        </div>
+    </div>
 
-<div class="controls">
-  <div class="ctrl-btn">▶</div>
-  <div class="ctrl-btn">▲</div>
-</div>
+    <div class="controls">
+        <button id="btn-right" class="move-btn">➡</button>
+        <button id="btn-up" class="move-btn disabled">⬆</button>
+    </div>
 
-<script>
-  const camera = document.getElementById("camera");
-  const frontBtn = document.getElementById("frontBtn");
-  const sideBtn = document.getElementById("sideBtn");
+    <iframe id="cmd-frame" name="cmd-frame"></iframe>
 
-  function setFront() {
-    camera.src = "http://192.168.11.28:8080/video";
-    frontBtn.className = "on";
-    sideBtn.className = "off";
-  }
+    <script>
+        // カメラ設定
+        const configs = {
+            mae: { ip: "192.168.11.28:8080", stream: "/video" },
+            yoko: { ip: "192.168.11.9:8080", stream: "/video" }
+        };
 
-  function setSide() {
-    camera.src = "http://192.168.11.9:8080/video";
-    sideBtn.className = "on";
-    frontBtn.className = "off";
-  }
-</script>
+        let currentCam = 'mae';
+        let step = 1; // 1:右, 2:奥, 3:終了
 
+        const streamImg = document.getElementById('camera-stream');
+        const btnRight = document.getElementById('btn-right');
+        const btnUp = document.getElementById('btn-up');
+        const cmdFrame = document.getElementById('cmd-frame');
+
+        // 映像切り替え
+        function switchCamera(target) {
+            currentCam = target;
+            document.getElementById('sw-mae').classList.toggle('active', target === 'mae');
+            document.getElementById('sw-yoko').classList.toggle('active', target === 'yoko');
+            
+            // 映像ソース更新
+            streamImg.src = `http://${configs[target].ip}${configs[target].stream}`;
+        }
+
+        // ライト制御命令
+        function setLight(state) {
+            const ip = configs[currentCam].ip;
+            const cmd = state ? 'enabletorch' : 'disabletorch';
+            cmdFrame.src = `http://${ip}/${cmd}?t=${Date.now()}`;
+        }
+
+        // 操作ロジック
+        function handleStart(e) {
+            e.preventDefault();
+            if (this.id === 'btn-right' && step === 1) {
+                setLight(true);
+                console.log("右移動中...");
+            } else if (this.id === 'btn-up' && step === 2) {
+                setLight(true);
+                console.log("奥移動中...");
+            }
+        }
+
+        function handleEnd() {
+            setLight(false);
+            if (this.id === 'btn-right' && step === 1) {
+                step = 2;
+                btnRight.classList.add('disabled');
+                btnUp.classList.remove('disabled');
+            } else if (this.id === 'btn-up' && step === 2) {
+                step = 3;
+                btnUp.classList.add('disabled');
+                console.log("キャッチ動作開始");
+                setTimeout(() => location.reload(), 5000); // 5秒後に初期化
+            }
+        }
+
+        // イベント登録
+        [btnRight, btnUp].forEach(btn => {
+            btn.addEventListener('mousedown', handleStart);
+            btn.addEventListener('touchstart', handleStart, {passive: false});
+            btn.addEventListener('mouseup', handleEnd);
+            btn.addEventListener('touchend', handleEnd);
+        });
+
+        // 初回起動
+        switchCamera('mae');
+    </script>
 </body>
 </html>
