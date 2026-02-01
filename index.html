@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Second Online - ID自由設定</title>
+    <title>Second Online - 固定ID・UI自動消去版</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
-        /* デザイン継承 */
         body { margin: 0; background: #fff; font-family: "Arial Black", sans-serif; overflow: hidden; touch-action: manipulation; text-align: center; }
         .header { background: #b2ebf2; padding: 10px 0; border-bottom: 2px solid #333; }
         .logo-main { font-size: 24px; color: #000; margin: 0; line-height: 1; }
@@ -24,10 +23,10 @@
         .move-btn.active { background: #ffeb3b; transform: scale(1.1); }
         .move-btn.disabled { opacity: 0.1; pointer-events: none; filter: grayscale(1); }
 
-        /* 同期・ID設定エリア */
-        .sync-box { position: fixed; bottom: 5px; right: 5px; background: #eee; padding: 8px; border: 2px solid #333; border-radius: 5px; font-size: 11px; z-index: 100; text-align: right; width: 180px; }
+        /* 同期エリア */
+        .sync-box { position: fixed; bottom: 5px; right: 5px; background: #eee; padding: 8px; border: 2px solid #333; border-radius: 5px; font-size: 11px; z-index: 100; text-align: right; width: 180px; transition: opacity 0.5s; }
+        .sync-box.hidden { display: none; }
         .sync-box input { width: 50px; padding: 3px; font-size: 14px; text-align: center; border: 1px solid #333; margin-bottom: 5px; }
-        .sync-label { font-weight: bold; display: block; margin-bottom: 2px; }
         .btn-sm { padding: 4px 8px; font-size: 11px; cursor: pointer; background: #fff; border: 1px solid #333; }
         #my-id-status { font-weight: bold; color: #29b6f6; font-size: 14px; display: block; margin-bottom: 5px; }
     </style>
@@ -40,15 +39,15 @@
     </div>
 
     <div class="video-container">
-        <div id="status-overlay">接続待機中</div>
+        <div id="status-overlay">ID未設定</div>
         <img id="camera-stream" src="" alt="">
     </div>
 
     <div class="info-bar">
         <div class="price">1Play100SP</div>
         <div class="camera-switch">
-            <button id="sw-mae" class="sw-btn mae active" onclick="switchCamera('mae')">まえ</button>
-            <button id="sw-yoko" class="sw-btn yoko" onclick="switchCamera('yoko')">よこ</button>
+            <button id="sw-mae" class="sw-btn mae active" onclick="manualSwitch('mae')">まえ</button>
+            <button id="sw-yoko" class="sw-btn yoko" onclick="manualSwitch('yoko')">よこ</button>
         </div>
     </div>
 
@@ -57,15 +56,13 @@
         <button id="btn-up" class="move-btn disabled">⬆</button>
     </div>
 
-    <div class="sync-box">
-        <span class="sync-label">▼ 自分のIDを決める</span>
+    <div id="sync-panel" class="sync-box">
+        <span style="font-weight:bold;">▼ ID設定 (固定)</span>
         <span id="my-id-status">未設定</span>
         <input type="number" id="my-set-id" placeholder="3桁">
-        <button class="btn-sm" onclick="startMyPeer()">決定</button>
-        
+        <button class="btn-sm" onclick="saveAndStartPeer()">ID保存・起動</button>
         <hr style="margin:8px 0; border:0; border-top:1px solid #ccc;">
-        
-        <span class="sync-label">▼ 相手に接続する</span>
+        <span style="font-weight:bold;">▼ 相手に接続</span><br>
         <input type="number" id="target-id" placeholder="3桁">
         <button class="btn-sm" onclick="connectToPeer()">接続</button>
     </div>
@@ -81,48 +78,48 @@
         let currentCam = 'mae';
         let step = 1;
 
-        // --- PeerJS: 自分のIDを指定して起動 ---
-        function startMyPeer() {
-            const chosenId = document.getElementById('my-set-id').value;
-            if (chosenId.length !== 3) {
-                alert("3桁の数字を入力してください。");
-                return;
+        // 起動時に保存されたIDがあれば読み込む
+        window.onload = () => {
+            const savedId = localStorage.getItem('myCraneId');
+            if (savedId) {
+                document.getElementById('my-set-id').value = savedId;
+                startPeer(savedId);
             }
+        };
 
-            if (peer) peer.destroy(); // 既に起動していたら破棄
+        function saveAndStartPeer() {
+            const chosenId = document.getElementById('my-set-id').value;
+            if (chosenId.length !== 3) return alert("3桁で入力してください");
+            localStorage.setItem('myCraneId', chosenId); // ブラウザに保存
+            startPeer(chosenId);
+        }
 
-            peer = new Peer(chosenId);
-
-            peer.on('open', (id) => {
-                document.getElementById('my-id-status').innerText = "ID: " + id;
-                document.getElementById('my-id-status').style.color = "#d32f2f";
+        function startPeer(id) {
+            if (peer) peer.destroy();
+            peer = new Peer(id);
+            peer.on('open', (openedId) => {
+                document.getElementById('my-id-status').innerText = "固定ID: " + openedId;
+                document.getElementById('status-overlay').innerText = "接続待機中...";
             });
-
-            peer.on('error', (err) => {
-                if (err.type === 'unavailable-id') {
-                    alert("そのIDは既に使われています。別の数字にしてください。");
-                    document.getElementById('my-id-status').innerText = "重複エラー";
-                }
-            });
-
-            // 受信待機
+            peer.on('error', (err) => { if(err.type === 'unavailable-id') alert("ID重複。変更してください"); });
             peer.on('connection', (c) => {
                 conn = c;
                 setupConn();
-                document.getElementById('status-overlay').innerText = "接続済み：操作受信中";
+                hideSyncBox(); // 接続されたら消す
             });
         }
 
-        // --- PeerJS: 相手に接続 ---
         function connectToPeer() {
-            if (!peer) {
-                alert("先に自分のIDを決定してください。");
-                return;
-            }
+            if (!peer) return alert("先にIDを決定してください");
             const tid = document.getElementById('target-id').value;
             conn = peer.connect(tid);
             setupConn();
-            document.getElementById('status-overlay').innerText = "接続済み：送信中 (" + tid + ")";
+            conn.on('open', hideSyncBox); // 接続が成功したら消す
+        }
+
+        function hideSyncBox() {
+            document.getElementById('sync-panel').classList.add('hidden');
+            document.getElementById('status-overlay').innerText = "同期完了";
         }
 
         function setupConn() {
@@ -131,7 +128,7 @@
                 if (data.action === 'PUSH' && btn) btn.classList.add('active');
                 if (data.action === 'RELEASE' && btn) btn.classList.remove('active');
                 if (data.cam) switchCamera(data.cam);
-                document.getElementById('status-overlay').innerText = `遠隔：${data.btn} ${data.action}`;
+                document.getElementById('status-overlay').innerText = `遠隔: ${data.btn} ${data.action}`;
             });
         }
 
@@ -141,12 +138,16 @@
             }
         }
 
-        // --- 操作・カメラ切り替えロジック ---
         function switchCamera(target) {
             currentCam = target;
             document.getElementById('sw-mae').classList.toggle('active', target === 'mae');
             document.getElementById('sw-yoko').classList.toggle('active', target === 'yoko');
             document.getElementById('camera-stream').src = `http://${configs[target].ip}${configs[target].stream}`;
+        }
+
+        function manualSwitch(target) {
+            switchCamera(target);
+            sendData('システム', '', 'CAM_SW:' + target);
         }
 
         function handleStart(e) {
@@ -164,13 +165,17 @@
                 document.getElementById('btn-right').classList.add('disabled');
                 document.getElementById('btn-up').classList.remove('disabled');
                 switchCamera('yoko');
-                sendData('システム', '', 'CAM:YOKO');
+                sendData('システム', '', 'AUTO_CAM:YOKO');
             } else if (this.id === 'btn-up' && step === 2) {
                 step = 3;
                 document.getElementById('btn-up').classList.add('disabled');
                 switchCamera('mae');
-                sendData('システム', '', 'CAM:MAE');
-                setTimeout(() => location.reload(), 10000);
+                sendData('システム', '', 'AUTO_CAM:MAE');
+                // リロードするとIDが消えるため、今回はリロードせず状態だけ戻す
+                setTimeout(() => {
+                    step = 1;
+                    document.getElementById('btn-right').classList.remove('disabled');
+                }, 5000);
             }
         }
 
