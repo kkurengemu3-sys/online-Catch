@@ -12,18 +12,13 @@
     text-align: center;
   }
 
-  /* ヘッダー */
   .header {
     background: #bff7f7;
     padding: 12px 0 6px;
     font-weight: bold;
   }
-  .header .title {
-    font-size: 28px;
-  }
-  .header .sub {
-    font-size: 14px;
-  }
+  .header .title { font-size: 28px; }
+  .header .sub { font-size: 14px; }
 
   /* 黒いゲーム画面 */
   .game {
@@ -33,21 +28,18 @@
     overflow: hidden;
   }
 
-  /* 映像を黒枠いっぱいに */
-  .game iframe {
+  /* 映像のみを全面表示 */
+  .camera {
     position: absolute;
-    top: 0;
-    left: 0;
+    inset: 0;
     width: 100%;
     height: 100%;
-    border: none;
+    object-fit: cover; /* ←重要 */
   }
 
-  /* 情報エリア */
   .info {
     display: flex;
     justify-content: space-between;
-    align-items: center;
     padding: 10px 20px;
     font-size: 24px;
     font-weight: bold;
@@ -61,15 +53,9 @@
     cursor: pointer;
   }
 
-  .on {
-    background: #4cc3ff;
-  }
+  .on { background: #4cc3ff; }
+  .off { background: #bdbdbd; }
 
-  .off {
-    background: #bdbdbd;
-  }
-
-  /* 操作ボタン */
   .controls {
     display: flex;
     justify-content: space-around;
@@ -86,8 +72,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    user-select: none;
   }
 </style>
 </head>
@@ -99,13 +83,13 @@
   <div class="sub">セカンド・エンターテイメント</div>
 </div>
 
-<!-- ゲーム画面 -->
+<!-- 黒枠＋映像のみ -->
 <div class="game">
-  <iframe
+  <img
     id="camera"
-    src="https://192.168.11.28:8080"
-    allow="autoplay">
-  </iframe>
+    class="camera"
+    src="http://192.168.11.28:8080"
+    alt="camera">
 </div>
 
 <div class="info">
@@ -127,13 +111,13 @@
   const sideBtn = document.getElementById("sideBtn");
 
   function setFront() {
-    camera.src = "https://192.168.11.28:8080";
+    camera.src = "http://192.168.11.28:8080";
     frontBtn.className = "on";
     sideBtn.className = "off";
   }
 
   function setSide() {
-    camera.src = "https://192.168.11.9:8080";
+    camera.src = "http://192.168.11.9:8080";
     sideBtn.className = "on";
     frontBtn.className = "off";
   }
