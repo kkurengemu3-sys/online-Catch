@@ -3,127 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Molly Online Clone - Full Embed</title>
+    <title>Molly Online Clone</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .bg-molly { background-color: #00a859; }
-        .camera-box { background-color: #000; width: 100%; aspect-ratio: 1/1; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        #camera-feed { width: 100%; height: 100%; object-fit: contain; }
-        .status-badge { position: absolute; top: 12px; right: 12px; background: rgba(0, 50, 0, 0.8); color: white; font-size: 10px; padding: 4px 8px; border: 1px solid #ffd700; z-index: 10; }
-        .error-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); color: white; display: none; flex-direction: column; items-center; justify-content: center; text-align: center; padding: 20px; z-index: 20; }
+        .bg-green-main { background-color: #00a859; }
+        .camera-container { background-color: #000; width: 100%; aspect-ratio: 1/1; position: relative; }
+        #view { width: 100%; height: 100%; object-fit: contain; }
     </style>
 </head>
-<body class="max-w-md mx-auto bg-gray-100 min-h-screen flex flex-col shadow-2xl">
+<body class="max-w-md mx-auto bg-gray-100 min-h-screen flex flex-col">
 
-    <header class="bg-molly p-4 flex justify-between items-center text-white shadow-lg">
-        <h1 class="font-black italic text-xl tracking-tighter">Molly.Online</h1>
-        <div class="flex gap-4 text-xs font-bold uppercase tracking-widest">
-            <span><i class="fas fa-signal"></i> Online</span>
-            <span><i class="fas fa-coins"></i> 1</span>
-        </div>
+    <header class="bg-green-main p-3 flex justify-between items-center text-white font-bold">
+        <span>Molly.Online</span>
+        <div class="flex gap-3 text-sm"><span>0人</span><span>1枚</span></div>
     </header>
 
-    <div class="camera-box">
-        <img id="camera-feed" src="https://192.168.11.28:8080" onerror="showError()">
-        
-        <div class="status-badge">動作確認用ブース</div>
-
-        <div id="error-ui" class="error-overlay">
-            <i class="fas fa-exclamation-triangle text-yellow-500 text-3xl mb-4"></i>
-            <p class="font-bold text-sm mb-2">埋め込み映像がブロックされました</p>
-            <p class="text-[10px] opacity-80 mb-6 leading-relaxed">
-                ブラウザのセキュリティ制限を解除する必要があります。<br>
-                下の「許可する」ボタンを押して、警告画面が出たら<br>
-                <b>「詳細設定」→「～にアクセスする」</b>をクリックしてください。
-            </p>
-            <button onclick="unlockSSL()" class="bg-white text-black text-xs font-black px-6 py-3 rounded-full shadow-xl">
-                埋め込みを許可する
-            </button>
-        </div>
+    <div class="camera-container">
+        <img id="view" src="https://192.168.11.28:8080">
+        <div class="absolute top-2 right-2 bg-green-900/80 text-white text-[10px] p-2 border border-yellow-400">動作確認用</div>
     </div>
 
-    <main class="bg-white p-6 flex-grow flex flex-col rounded-t-3xl -mt-6 z-30 shadow-[0_-10px_20px_rgba(0,0,0,0.1)]">
-        <div class="flex justify-between items-center mb-8">
-            <div class="flex flex-col">
-                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Cost</span>
-                <div class="flex items-center gap-2">
-                    <span class="bg-molly text-white text-[10px] px-2 py-0.5 rounded-full font-bold italic">MP</span>
-                    <span class="text-3xl font-black">0</span>
-                </div>
-            </div>
-            <div class="bg-gray-50 border border-gray-100 px-6 py-2 rounded-2xl shadow-inner">
-                <span class="text-gray-400 text-[10px] font-bold block leading-none mb-1">RESERVED</span>
-                <span class="font-black text-xl text-gray-700">0 <span class="text-xs">人</span></span>
-            </div>
+    <main class="bg-white p-4 flex-grow">
+        <div class="flex justify-between items-center mb-6">
+            <span class="text-2xl font-black text-green-600 tracking-tighter">0 MP</span>
+            <div class="bg-gray-100 px-4 py-1 rounded-full text-sm font-bold">予約 0人</div>
         </div>
 
-        <button class="bg-molly w-full py-5 rounded-3xl text-white text-2xl font-black shadow-[0_8px_0_#007a41] active:shadow-none active:translate-y-2 transition-all mb-8">
-            ゲーム予約
-        </button>
+        <button class="bg-green-main w-full py-4 rounded-full text-white text-2xl font-black shadow-lg mb-8">ゲーム予約</button>
 
-        <div class="flex justify-between items-center">
-            <span class="text-molly text-xs font-black border-b-2 border-molly pb-1">＞ 遊び方を見る</span>
-            <div class="flex gap-2 p-1.5 bg-gray-100 rounded-2xl">
-                <button id="btn-front" onclick="switchCam('front')" class="bg-molly text-white px-8 py-3 rounded-xl font-black text-sm shadow-md transition-all">まえ</button>
-                <button id="btn-side" onclick="switchCam('side')" class="bg-transparent text-gray-400 px-8 py-3 rounded-xl font-black text-sm transition-all">よこ</button>
+        <div class="flex justify-between items-center px-2">
+            <span class="text-green-600 font-bold text-sm">＞ 遊び方</span>
+            <div class="flex gap-2">
+                <button onclick="change('https://192.168.11.28:8080', this)" class="bg-green-main text-white px-6 py-2 rounded-lg font-bold">まえ</button>
+                <button onclick="change('https://192.168.11.9:8080', this)" class="bg-gray-300 text-white px-6 py-2 rounded-lg font-bold">よこ</button>
             </div>
         </div>
     </main>
 
-    <footer class="bg-gray-900 p-4 flex justify-between items-center text-white border-t border-gray-800">
-        <button class="text-gray-400 text-[10px] font-bold border border-gray-700 px-4 py-2 rounded-lg">BACK</button>
-        <div class="flex items-center gap-4">
-            <div class="text-right">
-                <span class="text-[8px] opacity-50 block uppercase">Balance</span>
-                <span class="font-black italic">37 MP</span>
-            </div>
-            <button class="bg-[#ff9900] px-6 py-2 rounded-xl font-black text-xs shadow-lg shadow-orange-900/20 italic">BUY</button>
-        </div>
+    <footer class="bg-gray-800 p-3 flex justify-between items-center">
+        <button class="bg-gray-500 text-white px-3 py-1 rounded text-xs">戻る</button>
+        <button class="bg-orange-500 text-white px-5 py-1 rounded font-bold">MP購入</button>
     </footer>
 
     <script>
-        const feed = document.getElementById('camera-feed');
-        const errorUi = document.getElementById('error-ui');
-        
-        const CAM_URLS = {
-            front: "https://192.168.11.28:8080",
-            side: "https://192.168.11.9:8080"
-        };
-
-        let currentMode = 'front';
-
-        function switchCam(mode) {
-            currentMode = mode;
-            errorUi.style.display = 'none';
-            feed.src = CAM_URLS[mode] + "?t=" + Date.now();
-
-            const fBtn = document.getElementById('btn-front');
-            const sBtn = document.getElementById('btn-side');
-            
-            if(mode === 'front') {
-                fBtn.className = "bg-molly text-white px-8 py-3 rounded-xl font-black text-sm shadow-md transition-all";
-                sBtn.className = "bg-transparent text-gray-400 px-8 py-3 rounded-xl font-black text-sm transition-all";
-            } else {
-                sBtn.className = "bg-molly text-white px-8 py-3 rounded-xl font-black text-sm shadow-md transition-all";
-                fBtn.className = "bg-transparent text-gray-400 px-8 py-3 rounded-xl font-black text-sm transition-all";
-            }
-        }
-
-        function showError() {
-            errorUi.style.display = 'flex';
-        }
-
-        function unlockSSL() {
-            // 別窓で一度開いて許可させ、自動的に閉じてから埋め込みをリロードする処理
-            const win = window.open(CAM_URLS[currentMode], '_blank');
-            const timer = setInterval(() => {
-                if (win.closed) {
-                    clearInterval(timer);
-                    switchCam(currentMode); // 許可後にリロード
-                }
-            }, 500);
-            alert("開いたタブで「詳細設定」からアクセスを許可した後、そのタブを閉じて戻ってきてください。");
+        function change(url, btn) {
+            document.getElementById('view').src = url;
+            const btns = btn.parentElement.children;
+            btns[0].className = "bg-gray-300 text-white px-6 py-2 rounded-lg font-bold";
+            btns[1].className = "bg-gray-300 text-white px-6 py-2 rounded-lg font-bold";
+            btn.className = "bg-green-main text-white px-6 py-2 rounded-lg font-bold";
         }
     </script>
 </body>
