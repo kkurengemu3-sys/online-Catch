@@ -1,45 +1,131 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .bg-molly { background-color: #00a859; }
-        .camera-view { background: #000; width: 100%; aspect-ratio: 1/1; }
-        img { width: 100%; height: 100%; object-fit: contain; }
-    </style>
+<meta charset="UTF-8">
+<title>Second Online</title>
+<style>
+  body {
+    margin: 0;
+    font-family: sans-serif;
+    background: #fff;
+    text-align: center;
+  }
+
+  .header {
+    background: #bff7f7;
+    padding: 12px 0 6px;
+    font-weight: bold;
+  }
+
+  .header .title {
+    font-size: 28px;
+  }
+
+  .header .sub {
+    font-size: 14px;
+  }
+
+  /* ゲーム画面 */
+  .game {
+    background: #000;
+    height: 320px;
+    position: relative;
+  }
+
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  /* 情報 */
+  .info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    font-size: 24px;
+    font-weight: bold;
+  }
+
+  .mode-btns button {
+    font-size: 18px;
+    padding: 6px 18px;
+    margin-left: 5px;
+    border: none;
+    cursor: pointer;
+  }
+
+  .on {
+    background: #4cc3ff;
+  }
+
+  .off {
+    background: #bdbdbd;
+  }
+
+  /* 操作ボタン */
+  .controls {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 30px;
+  }
+
+  .ctrl-btn {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: #bff7f7;
+    border: 5px solid #000;
+    font-size: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+</style>
 </head>
-<body class="max-w-md mx-auto bg-gray-100 min-h-screen flex flex-col">
+<body>
 
-    <header class="bg-molly p-3 flex justify-between items-center text-white font-bold">
-        <span>Molly.Online</span>
-        <div class="text-sm">0人 / 1枚</div>
-    </header>
+<div class="header">
+  <div class="title">Second Online</div>
+  <div class="sub">セカンド・エンターテイメント</div>
+</div>
 
-    <div class="camera-view">
-        <img id="cam" src="https://192.168.11.28:8080">
-    </div>
+<div class="game">
+  <iframe id="camera" src="https://192.168.11.28:8080"></iframe>
+</div>
 
-    <main class="bg-white p-4 flex-grow">
-        <div class="flex justify-between items-center mb-6">
-            <span class="text-3xl font-black text-green-600">0 MP</span>
-            <div class="bg-gray-100 px-4 py-1 rounded-full text-sm font-bold">予約 0人</div>
-        </div>
+<div class="info">
+  <div>1Play100SP</div>
+  <div class="mode-btns">
+    <button id="frontBtn" class="on" onclick="setFront()">まえ</button>
+    <button id="sideBtn" class="off" onclick="setSide()">よこ</button>
+  </div>
+</div>
 
-        <button class="bg-molly w-full py-5 rounded-full text-white text-2xl font-black shadow-lg mb-8">
-            ゲーム予約
-        </button>
+<div class="controls">
+  <div class="ctrl-btn">▶</div>
+  <div class="ctrl-btn">▲</div>
+</div>
 
-        <div class="flex justify-end gap-2">
-            <button onclick="document.getElementById('cam').src='https://192.168.11.28:8080'" class="bg-molly text-white px-8 py-2 rounded-lg font-bold shadow">まえ</button>
-            <button onclick="document.getElementById('cam').src='https://192.168.11.9:8080'" class="bg-gray-400 text-white px-8 py-2 rounded-lg font-bold">よこ</button>
-        </div>
-    </main>
+<script>
+  const camera = document.getElementById("camera");
+  const frontBtn = document.getElementById("frontBtn");
+  const sideBtn = document.getElementById("sideBtn");
 
-    <footer class="bg-gray-800 p-4 flex justify-between items-center mt-auto">
-        <button class="bg-gray-500 text-white px-4 py-1 rounded text-xs">戻る</button>
-        <button class="bg-orange-500 text-white px-6 py-1 rounded font-bold shadow">MP購入</button>
-    </footer>
+  function setFront() {
+    camera.src = "https://192.168.11.28:8080";
+    frontBtn.className = "on";
+    sideBtn.className = "off";
+  }
+
+  function setSide() {
+    camera.src = "https://192.168.11.9:8080";
+    sideBtn.className = "on";
+    frontBtn.className = "off";
+  }
+</script>
 
 </body>
 </html>
