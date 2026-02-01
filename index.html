@@ -2,57 +2,46 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Molly Online Clone</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .bg-green-main { background-color: #00a859; }
-        .camera-container { background-color: #000; width: 100%; aspect-ratio: 1/1; position: relative; }
-        #view { width: 100%; height: 100%; object-fit: contain; }
+        .bg-molly { background-color: #00a859; }
+        img { width: 100%; height: 100%; object-fit: contain; background: #000; }
     </style>
 </head>
-<body class="max-w-md mx-auto bg-gray-100 min-h-screen flex flex-col">
+<body class="max-w-md mx-auto min-h-screen flex flex-col bg-gray-100">
 
-    <header class="bg-green-main p-3 flex justify-between items-center text-white font-bold">
+    <header class="bg-molly p-3 text-white font-bold flex justify-between shadow">
         <span>Molly.Online</span>
-        <div class="flex gap-3 text-sm"><span>0人</span><span>1枚</span></div>
+        <span class="text-sm">0人 / 1枚</span>
     </header>
 
-    <div class="camera-container">
-        <img id="view" src="https://192.168.11.28:8080">
-        <div class="absolute top-2 right-2 bg-green-900/80 text-white text-[10px] p-2 border border-yellow-400">動作確認用</div>
+    <div class="aspect-square w-full bg-black">
+        <img id="cam" src="https://192.168.11.28:8080">
     </div>
 
-    <main class="bg-white p-4 flex-grow">
+    <div class="bg-white p-4 flex-grow shadow-inner">
         <div class="flex justify-between items-center mb-6">
-            <span class="text-2xl font-black text-green-600 tracking-tighter">0 MP</span>
+            <span class="text-3xl font-black text-green-600">0 MP</span>
             <div class="bg-gray-100 px-4 py-1 rounded-full text-sm font-bold">予約 0人</div>
         </div>
 
-        <button class="bg-green-main w-full py-4 rounded-full text-white text-2xl font-black shadow-lg mb-8">ゲーム予約</button>
+        <button class="bg-molly w-full py-5 rounded-full text-white text-2xl font-black shadow-lg mb-8 active:scale-95 transition-all">
+            ゲーム予約
+        </button>
 
-        <div class="flex justify-between items-center px-2">
+        <div class="flex justify-between items-center">
             <span class="text-green-600 font-bold text-sm">＞ 遊び方</span>
             <div class="flex gap-2">
-                <button onclick="change('https://192.168.11.28:8080', this)" class="bg-green-main text-white px-6 py-2 rounded-lg font-bold">まえ</button>
-                <button onclick="change('https://192.168.11.9:8080', this)" class="bg-gray-300 text-white px-6 py-2 rounded-lg font-bold">よこ</button>
+                <button onclick="document.getElementById('cam').src='https://192.168.11.28:8080'" class="bg-molly text-white px-8 py-2 rounded-lg font-bold shadow">まえ</button>
+                <button onclick="document.getElementById('cam').src='https://192.168.11.9:8080'" class="bg-gray-400 text-white px-8 py-2 rounded-lg font-bold">よこ</button>
             </div>
         </div>
-    </main>
+    </div>
 
-    <footer class="bg-gray-800 p-3 flex justify-between items-center">
-        <button class="bg-gray-500 text-white px-3 py-1 rounded text-xs">戻る</button>
-        <button class="bg-orange-500 text-white px-5 py-1 rounded font-bold">MP購入</button>
+    <footer class="bg-gray-800 p-4 flex justify-between items-center">
+        <button class="bg-gray-500 text-white px-4 py-1 rounded text-xs">戻る</button>
+        <button class="bg-orange-500 text-white px-6 py-1 rounded font-bold shadow">MP購入</button>
     </footer>
 
-    <script>
-        function change(url, btn) {
-            document.getElementById('view').src = url;
-            const btns = btn.parentElement.children;
-            btns[0].className = "bg-gray-300 text-white px-6 py-2 rounded-lg font-bold";
-            btns[1].className = "bg-gray-300 text-white px-6 py-2 rounded-lg font-bold";
-            btn.className = "bg-green-main text-white px-6 py-2 rounded-lg font-bold";
-        }
-    </script>
 </body>
 </html>
