@@ -2,149 +2,60 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Molly Online - High Reliability</title>
+    <title>Online Crane Game</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .btn-green { background-color: #00a859; color: white; }
-        .btn-orange { background-color: #ff9900; color: white; }
-        .game-screen { background-color: #000; aspect-ratio: 1 / 1; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        #camera-stream { width: 100%; height: 100%; object-fit: contain; }
-        .loading-spinner { border: 4px solid rgba(255, 255, 255, 0.3); border-top: 4px solid #00a859; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .bg-molly { background-color: #00a859; }
+        .camera-container { background-color: #000; width: 100%; aspect-ratio: 1/1; position: relative; }
+        /* 埋め込み画像の設定 */
+        #cam-screen { width: 100%; height: 100%; object-fit: contain; }
     </style>
 </head>
-<body class="max-w-md mx-auto bg-gray-100 min-h-screen flex flex-col font-sans">
+<body class="max-w-md mx-auto bg-gray-100 min-h-screen">
 
-    <header class="btn-green p-3 flex justify-between items-center font-bold shadow-md z-10">
-        <span class="text-xl tracking-tighter">Molly.Online</span>
-        <div class="flex gap-4 text-sm items-center">
-            <span id="status-dot" class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-            <span><i class="fas fa-users"></i> 0</span>
-        </div>
-    </header>
+    <div class="bg-molly p-3 text-white font-bold flex justify-between">
+        <span>Molly.Online (HTTP Mode)</span>
+        <span>Coins: 1</span>
+    </div>
 
-    <div class="game-screen shadow-inner" id="viewport">
-        <div id="loader" class="absolute flex flex-col items-center gap-2">
-            <div class="loading-spinner"></div>
-            <p class="text-white text-[10px]">CONNECTING...</p>
-        </div>
-
-        <img id="camera-stream" 
-             src="" 
-             alt="Camera" 
-             class="opacity-0 transition-opacity duration-500"
-             onload="onStreamLoad()" 
-             onerror="onStreamError()">
+    <div class="camera-container">
+        <img id="cam-screen" src="http://192.168.11.28:8080" alt="Camera View">
         
-        <div class="absolute top-4 right-4 bg-green-900/80 text-white text-[10px] p-2 border border-yellow-400 pointer-events-none">
-            こちらのブースは動作確認用です
+        <div class="absolute top-2 right-2 bg-black/50 text-white text-[10px] p-1 border border-yellow-500">
+            LIVE
         </div>
     </div>
 
-    <main class="bg-white p-4 flex-grow flex flex-col gap-4 shadow-2xl rounded-t-3xl -mt-4 z-20">
-        <div class="flex justify-between items-center px-2">
-            <div>
-                <p class="text-xs text-gray-400 font-bold uppercase">Cost per play</p>
-                <div class="flex items-center gap-1">
-                    <span class="bg-green-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">MP</span>
-                    <span class="text-2xl font-black">0</span>
-                </div>
-            </div>
-            <div class="text-right">
-                <div class="inline-block bg-gray-100 px-6 py-2 rounded-full border border-gray-200 shadow-inner">
-                    <span class="text-gray-500 text-xs font-bold mr-2">予約人数</span>
-                    <span class="font-black text-lg" id="reserved-count">0</span>
-                </div>
-            </div>
+    <div class="bg-white p-4">
+        <div class="flex justify-between items-center mb-4">
+            <span class="text-2xl font-black text-green-600">0 MP</span>
+            <div class="bg-gray-100 px-4 py-1 rounded-full text-sm">予約: 0人</div>
         </div>
 
-        <button class="btn-green w-full py-5 rounded-2xl text-2xl font-black shadow-[0_5px_0_rgb(0,120,60)] active:shadow-none active:translate-y-1 transition-all">
+        <button class="bg-molly w-full py-4 rounded-full text-white text-2xl font-black shadow-lg mb-6 active:translate-y-1">
             ゲーム予約
         </button>
 
-        <div class="flex justify-between items-center mt-2">
-            <a href="#" class="text-green-600 text-xs font-bold underline">＞ 遊び方を見る</a>
-            <div class="flex gap-2 p-1 bg-gray-100 rounded-xl">
-                <button id="btn-front" onclick="setCamera('front')" class="btn-green px-6 py-2 rounded-lg font-bold text-sm transition-all shadow-md">まえ</button>
-                <button id="btn-side" onclick="setCamera('side')" class="bg-transparent text-gray-400 px-6 py-2 rounded-lg font-bold text-sm transition-all">よこ</button>
+        <div class="flex justify-between items-center">
+            <span class="text-green-600 text-sm font-bold">＞ 遊び方</span>
+            <div class="flex gap-2">
+                <button onclick="switchCam('http://192.168.11.28:8080', this)" class="bg-molly text-white px-6 py-2 rounded-lg font-bold shadow-md">まえ</button>
+                <button onclick="switchCam('http://192.168.11.9:8080', this)" class="bg-gray-300 text-white px-6 py-2 rounded-lg font-bold">よこ</button>
             </div>
         </div>
-
-        <button class="w-full mt-4 py-2 border border-gray-200 rounded-lg text-gray-400 text-xs flex items-center justify-center gap-2 bg-gray-50">
-            <i class="fas fa-comment"></i> お問い合わせ
-        </button>
-    </main>
-
-    <footer class="bg-gray-800 p-3 flex justify-between items-center text-white">
-        <button class="bg-gray-600 px-4 py-1.5 rounded text-[10px] font-bold uppercase tracking-widest">Back</button>
-        <div class="flex items-center gap-4">
-            <div class="flex items-center gap-1">
-                <span class="text-[10px] opacity-60 uppercase">Balance</span>
-                <span class="font-bold">37</span>
-                <span class="text-[8px] bg-green-600 px-1 rounded">MP</span>
-            </div>
-            <button class="btn-orange px-4 py-1.5 rounded-lg font-black text-xs shadow-lg">MP購入</button>
-        </div>
-    </footer>
+    </div>
 
     <script>
-        const camImg = document.getElementById('camera-stream');
-        const loader = document.getElementById('loader');
-        const statusDot = document.getElementById('status-dot');
-        
-        const CAM_URLS = {
-            front: "https://192.168.11.28:8080",
-            side: "https://192.168.11.9:8080"
-        };
+        function switchCam(url, btn) {
+            // 埋め込み画像を直接書き換え
+            document.getElementById('cam-screen').src = url;
 
-        let currentMode = 'front';
-
-        // 起動時
-        window.onload = () => {
-            setCamera('front');
-        };
-
-        function setCamera(mode) {
-            currentMode = mode;
-            const url = CAM_URLS[mode];
-            
-            // UIの状態変更
-            loader.style.display = 'flex';
-            camImg.classList.add('opacity-0');
-            statusDot.classList.replace('bg-green-500', 'bg-red-500');
-
-            // ボタンのデザイン変更
-            const fBtn = document.getElementById('btn-front');
-            const sBtn = document.getElementById('btn-side');
-            if(mode === 'front') {
-                fBtn.className = "btn-green px-6 py-2 rounded-lg font-bold text-sm shadow-md";
-                sBtn.className = "bg-transparent text-gray-400 px-6 py-2 rounded-lg font-bold text-sm";
-            } else {
-                sBtn.className = "btn-green px-6 py-2 rounded-lg font-bold text-sm shadow-md";
-                fBtn.className = "bg-transparent text-gray-400 px-6 py-2 rounded-lg font-bold text-sm";
-            }
-
-            // 強制埋め込み実行
-            camImg.src = url + "?t=" + new Date().getTime(); // キャッシュ回避
-        }
-
-        function onStreamLoad() {
-            loader.style.display = 'none';
-            camImg.classList.remove('opacity-0');
-            statusDot.classList.replace('bg-red-500', 'bg-green-500');
-            console.log("Stream Connected");
-        }
-
-        function onStreamError() {
-            console.error("Connection Failed. Retrying...");
-            // 3秒後に自動リトライ
-            setTimeout(() => {
-                if(camImg.classList.contains('opacity-0')) {
-                    setCamera(currentMode);
-                }
-            }, 3000);
+            // ボタン色の切り替え
+            const buttons = btn.parentElement.querySelectorAll('button');
+            buttons.forEach(b => {
+                b.className = "bg-gray-300 text-white px-6 py-2 rounded-lg font-bold";
+            });
+            btn.className = "bg-molly text-white px-6 py-2 rounded-lg font-bold shadow-md";
         }
     </script>
 </body>
