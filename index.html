@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Second Online - オートカメラ切り替え</title>
+    <title>Second Online - 手動・自動ハイブリッド</title>
     <style>
         body { margin: 0; background: #fff; font-family: "Arial Black", sans-serif; overflow: hidden; touch-action: manipulation; text-align: center; }
         .header { background: #b2ebf2; padding: 10px 0; border-bottom: 2px solid #333; }
@@ -17,10 +17,11 @@
         .price { font-size: 24px; font-weight: bold; }
 
         .camera-switch { display: flex; gap: 5px; }
-        .sw-btn { padding: 8px 20px; font-size: 18px; font-weight: bold; border: none; border-radius: 2px; color: #000; width: 70px; opacity: 0.5; transition: 0.3s; }
+        .sw-btn { padding: 8px 20px; font-size: 18px; font-weight: bold; border: none; border-radius: 2px; color: #000; width: 70px; cursor: pointer; opacity: 0.4; transition: 0.2s; }
         .sw-btn.mae { background: #29b6f6; }
         .sw-btn.yoko { background: #bdbdbd; }
-        .sw-btn.active { opacity: 1; outline: 3px solid #000; }
+        /* 選択中のカメラを強調 */
+        .sw-btn.active { opacity: 1; outline: 3px solid #000; z-index: 2; }
 
         .controls { display: flex; justify-content: space-around; padding-top: 50px; }
         .move-btn { 
@@ -49,8 +50,8 @@
     <div class="info-bar">
         <div class="price">1Play100SP</div>
         <div class="camera-switch">
-            <button id="sw-mae" class="sw-btn mae active">まえ</button>
-            <button id="sw-yoko" class="sw-btn yoko">よこ</button>
+            <button id="sw-mae" class="sw-btn mae active" onclick="switchCamera('mae')">まえ</button>
+            <button id="sw-yoko" class="sw-btn yoko" onclick="switchCamera('yoko')">よこ</button>
         </div>
     </div>
 
@@ -77,15 +78,16 @@
         const swYoko = document.getElementById('sw-yoko');
         const cmdFrame = document.getElementById('cmd-frame');
 
-        // カメラ切り替え
+        // カメラ切り替え（手動・自動共通）
         function switchCamera(target) {
             currentCam = target;
             swMae.classList.toggle('active', target === 'mae');
             swYoko.classList.toggle('active', target === 'yoko');
             streamImg.src = `http://${configs[target].ip}${configs[target].stream}`;
+            console.log("Camera switched to: " + target);
         }
 
-        // ライト制御（IP Webcam形式）
+        // ライト制御
         function setLight(state) {
             const ip = configs[currentCam].ip;
             const cmd = state ? 'enabletorch' : 'disabletorch';
@@ -94,24 +96,26 @@
 
         function handleStart(e) {
             e.preventDefault();
-            setLight(true);
+            setLight(true); // 現在表示中のカメラのライトを点灯
         }
 
         function handleEnd() {
-            setLight(false);
+            setLight(false); // 離したら消灯
+            
             if (this.id === 'btn-right' && step === 1) {
-                // ➡を離した時：自動で「よこ」へ
+                // 自動切り替え
                 step = 2;
                 btnRight.classList.add('disabled');
                 btnUp.classList.remove('disabled');
                 switchCamera('yoko');
             } else if (this.id === 'btn-up' && step === 2) {
-                // ⬆を離した時：自動で「まえ」へ
+                // 自動切り替え
                 step = 3;
                 btnUp.classList.add('disabled');
                 switchCamera('mae');
-                console.log("アーム降下開始...");
-                setTimeout(() => location.reload(), 8000); // 終了後リロード
+                console.log("アーム降下中...");
+                // 8秒後にリセット（テスト用）
+                setTimeout(() => location.reload(), 8000);
             }
         }
 
@@ -122,7 +126,7 @@
             btn.addEventListener('touchend', handleEnd);
         });
 
-        // 初期状態
+        // 初回読み込み
         switchCamera('mae');
     </script>
 </body>
