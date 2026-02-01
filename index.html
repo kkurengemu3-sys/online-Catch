@@ -3,105 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Molly Online - Fixed Camera</title>
+    <title>Molly Online Custom</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #f0f4f8; font-family: sans-serif; }
-        .game-screen { background-color: #1a1a1a; aspect-ratio: 1 / 1; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .btn-green { background-color: #00a859; color: white; }
         .btn-orange { background-color: #ff9900; color: white; }
-        .camera-stream { width: 100%; height: 100%; object-fit: contain; }
-        .overlay-note { position: absolute; top: 10px; right: 10px; background: rgba(0, 50, 0, 0.8); color: white; font-size: 10px; padding: 5px; border: 1px solid #ffd700; pointer-events: none; }
     </style>
 </head>
-<body class="max-w-md mx-auto shadow-lg min-h-screen flex flex-col bg-white">
+<body class="max-w-md mx-auto bg-gray-100 min-h-screen flex flex-col">
 
-    <header class="btn-green p-3 flex justify-between items-center text-white font-bold shadow-md">
+    <div class="btn-green p-3 flex justify-between items-center font-bold text-white">
         <span>Molly.Online</span>
-        <div class="flex gap-4 text-sm"><i class="fas fa-users"></i> 0 <i class="fas fa-coins ml-2"></i> 1</div>
-    </header>
+        <span><i class="fas fa-users"></i> 0</span>
+    </div>
 
-    <main class="flex-grow">
-        <div class="game-screen" id="screen">
-            <img id="cam-img" src="http://192.168.11.28:8080" class="camera-stream" onerror="showError()">
-            
-            <div id="error-ui" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-black/80 text-white p-6 text-center">
-                <p class="text-sm mb-4 text-red-400 font-bold">⚠️ カメラに接続できません</p>
-                <p class="text-xs mb-4">ブラウザの保護機能でブロックされています。<br>下のボタンを押して「許可」してください。</p>
-                <a id="fix-link" href="http://192.168.11.28:8080" target="_blank" class="bg-blue-600 px-4 py-2 rounded text-sm font-bold">カメラを直接開いて許可</a>
-                <p class="text-[10px] mt-2 opacity-70">※開いた先で「詳細」→「実行」後、ここに戻って更新</p>
-            </div>
+    <div class="bg-black aspect-square w-full relative flex items-center justify-center text-white text-center p-4">
+        <div>
+            <p class="mb-4 text-sm font-bold text-yellow-400">【重要】</p>
+            <p class="text-xs leading-relaxed">
+                下の「まえ」「よこ」ボタンを押すと<br>
+                別ウィンドウでカメラ映像が開きます。<br>
+                （ブロックされたら「常に許可」を選択してください）
+            </p>
+        </div>
+    </div>
 
-            <div class="overlay-note text-center">
-                動作・通信確認用<br>景品獲得なし
-            </div>
+    <div class="bg-white p-4 flex-grow">
+        <div class="flex justify-between items-center mb-6">
+            <span class="font-bold text-lg">1Play 0MP</span>
+            <div class="border px-4 py-1 rounded-full text-sm">予約人数 0</div>
         </div>
 
-        <div class="p-4 bg-white">
-            <div class="flex justify-between items-center mb-6">
-                <div class="flex items-center gap-2">
-                    <span class="font-bold">1Play</span>
-                    <span class="bg-green-600 text-white text-[10px] px-2 py-0.5 rounded-full">MP</span>
-                    <span class="text-xl font-bold">0</span>
-                </div>
-                <div class="bg-gray-100 px-4 py-1 rounded-full border text-sm font-bold">
-                    予約人数 <span class="ml-2">0</span>
-                </div>
-            </div>
+        <button class="btn-green w-full py-4 rounded-full text-2xl font-black shadow-lg mb-8">
+            ゲーム予約
+        </button>
 
-            <button class="btn-green w-full py-4 rounded-full text-2xl font-black shadow-lg mb-6">ゲーム予約</button>
-
-            <div class="flex justify-between items-center">
-                <span class="text-green-600 text-sm font-bold">＞ 遊び方</span>
-                <div class="flex gap-2">
-                    <button id="btn-f" onclick="changeCam('front')" class="btn-green px-4 py-2 rounded-lg font-bold">まえ</button>
-                    <button id="btn-s" onclick="changeCam('side')" class="bg-gray-300 text-white px-4 py-2 rounded-lg font-bold">よこ</button>
-                </div>
+        <div class="flex justify-between items-center">
+            <span class="text-green-600 font-bold text-sm">＞ 遊び方を見る</span>
+            <div class="flex gap-2">
+                <button onclick="openCam('https://192.168.11.28:8080')" class="btn-green px-6 py-2 rounded-lg font-bold">まえ</button>
+                <button onclick="openCam('https://192.168.11.9:8080')" class="bg-gray-400 text-white px-6 py-2 rounded-lg font-bold">よこ</button>
             </div>
         </div>
-    </main>
+    </div>
 
-    <footer class="bg-gray-800 text-white p-3 flex justify-between items-center">
-        <button class="bg-gray-500 px-3 py-1 rounded text-xs">戻る</button>
-        <div class="flex items-center gap-2">
-            <span class="text-xs">保有</span>
-            <span class="bg-green-600 px-2 py-0.5 rounded-full text-[10px]">MP</span>
-            <span class="font-bold">37</span>
-        </div>
-        <button class="btn-orange px-4 py-1 rounded font-bold text-sm">MP購入</button>
-    </footer>
+    <div class="bg-gray-800 p-3 flex justify-between items-center mt-auto">
+        <button class="bg-gray-500 text-white px-4 py-1 rounded text-xs">戻る</button>
+        <button class="btn-orange px-6 py-1 rounded font-bold text-white">MP購入</button>
+    </div>
 
     <script>
-        const img = document.getElementById('cam-img');
-        const errorUi = document.getElementById('error-ui');
-        const fixLink = document.getElementById('fix-link');
-        const btnF = document.getElementById('btn-f');
-        const btnS = document.getElementById('btn-s');
-
-        const config = {
-            front: "http://192.168.11.28:8080",
-            side: "http://192.168.11.9:8080"
-        };
-
-        function changeCam(mode) {
-            errorUi.classList.add('hidden');
-            const url = config[mode];
-            img.src = url;
-            fixLink.href = url;
-
-            if(mode === 'front') {
-                btnF.className = "btn-green px-4 py-2 rounded-lg font-bold";
-                btnS.className = "bg-gray-300 text-white px-4 py-2 rounded-lg font-bold";
-            } else {
-                btnS.className = "btn-green px-4 py-2 rounded-lg font-bold";
-                btnF.className = "bg-gray-300 text-white px-4 py-2 rounded-lg font-bold";
-            }
-        }
-
-        function showError() {
-            errorUi.classList.remove('hidden');
+        function openCam(url) {
+            // 別ウィンドウで開く（これが一番ブロックされにくい）
+            window.open(url, 'camera_view', 'width=500,height=500,menubar=no,toolbar=no');
         }
     </script>
+
 </body>
 </html>
