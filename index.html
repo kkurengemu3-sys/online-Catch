@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Molly Online Clone - Dual Camera</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #f0f4f8; font-family: 'Helvetica Neue', Arial, sans-serif; }
+        .game-screen { background-color: #000; aspect-ratio: 1 / 1; position: relative; }
+        .btn-green { background-color: #00a859; color: white; }
+        .btn-orange { background-color: #ff9900; color: white; }
+        .camera-stream { width: 100%; height: 100%; object-fit: cover; }
+    </style>
+</head>
+<body class="max-w-md mx-auto shadow-lg min-h-screen flex flex-col">
+
+    <header class="btn-green p-3 flex justify-between items-center text-white font-bold">
+        <div class="flex items-center gap-1">
+            <span class="text-xl">Molly.Online</span>
+        </div>
+        <div class="flex gap-4 text-sm">
+            <span><i class="fas fa-users"></i> 0</span>
+            <span><i class="fas fa-coins"></i> 1</span>
+        </div>
+    </header>
+
+    <main class="flex-grow flex flex-col">
+        
+        <div class="game-screen w-full relative overflow-hidden" id="video-container">
+            <iframe id="camera-frame" src="https://192.168.11.28:8080" class="camera-stream" frameborder="0"></iframe>
+            
+            <div class="absolute top-4 right-4 bg-green-900/80 text-white text-[10px] p-2 border border-yellow-400 leading-tight pointer-events-none">
+                こちらのブースは<br>動作・通信確認用です<br>景品の獲得は<br>ございませんので<br>ご了承ください
+            </div>
+        </div>
+
+        <div class="bg-white p-3 flex justify-between items-center border-b">
+            <div class="flex items-center gap-2">
+                <span class="font-bold">1Play</span>
+                <span class="bg-green-600 text-white text-xs px-2 py-0.5 rounded-full font-bold">MP</span>
+                <span class="font-bold text-lg">0MP</span>
+            </div>
+            <div class="flex items-center gap-2 text-gray-400 text-sm">
+                <i class="fas fa-ticket-alt"></i> --枚
+                <label class="flex items-center gap-1 bg-gray-200 px-2 py-1 rounded">
+                    <input type="checkbox" disabled> チケット
+                </label>
+            </div>
+        </div>
+
+        <div class="flex justify-end p-2 bg-gray-50">
+            <div class="bg-white px-6 py-1 rounded-full shadow-inner border flex gap-4">
+                <span class="text-gray-600 font-bold text-sm">予約人数</span>
+                <span class="font-black">0</span>
+            </div>
+        </div>
+
+        <div class="flex flex-col items-center py-6 gap-4">
+            <button class="btn-green w-64 py-4 rounded-full text-2xl font-black shadow-lg active:scale-95 transition-transform">
+                ゲーム予約
+            </button>
+            
+            <div class="flex w-full px-4 justify-between items-center">
+                <a href="#" class="text-green-600 text-sm font-bold">＞ 遊び方を見る</a>
+                <div class="flex gap-2">
+                    <button class="bg-white p-2 rounded-full border shadow-sm"><i class="fas fa-music text-green-500"></i></button>
+                    <button id="btn-front" class="btn-green px-4 py-2 rounded-lg flex items-center gap-2 font-bold shadow-md transition-colors">
+                        <i class="fas fa-camera"></i> まえ
+                    </button>
+                    <button id="btn-side" class="bg-gray-300 px-4 py-2 rounded-lg text-white font-bold hover:bg-gray-400 transition-colors">
+                        よこ
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <button class="mx-4 p-2 bg-gray-100 rounded border text-gray-400 flex justify-center items-center gap-2 text-sm">
+            <i class="fas fa-comment"></i> お問い合わせ
+        </button>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white p-2 flex justify-between items-center sticky bottom-0">
+        <button class="bg-gray-500 px-3 py-1 rounded text-xs">戻る</button>
+        <div class="flex gap-3 items-center">
+            <span class="text-xs">保有</span>
+            <span class="bg-green-600 px-2 py-0.5 rounded-full text-[10px] font-bold">MP</span>
+            <span class="font-bold text-sm">37</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <i class="fas fa-ticket-alt text-xs"></i> 0
+            <button class="btn-orange px-4 py-1 rounded font-bold text-sm">MP購入</button>
+        </div>
+    </footer>
+
+    <script>
+        const cameraFrame = document.getElementById('camera-frame');
+        const btnFront = document.getElementById('btn-front');
+        const btnSide = document.getElementById('btn-side');
+
+        const URL_FRONT = "https://192.168.11.28:8080";
+        const URL_SIDE  = "https://192.168.11.9:8080";
+
+        // まえボタン処理
+        btnFront.addEventListener('click', () => {
+            cameraFrame.src = URL_FRONT;
+            // スタイル切り替え
+            btnFront.classList.replace('bg-gray-300', 'btn-green');
+            btnSide.classList.replace('btn-green', 'bg-gray-300');
+        });
+
+        // よこボタン処理
+        btnSide.addEventListener('click', () => {
+            cameraFrame.src = URL_SIDE;
+            // スタイル切り替え
+            btnSide.classList.add('btn-green');
+            btnSide.classList.remove('bg-gray-300');
+            btnFront.classList.add('bg-gray-300');
+            btnFront.classList.remove('btn-green');
+        });
+    </script>
+</body>
+</html>
