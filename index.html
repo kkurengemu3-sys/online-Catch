@@ -5,40 +5,38 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .bg-molly { background-color: #00a859; }
-        img { width: 100%; height: 100%; object-fit: contain; background: #000; }
+        .camera-view { background: #000; width: 100%; aspect-ratio: 1/1; }
+        img { width: 100%; height: 100%; object-fit: contain; }
     </style>
 </head>
-<body class="max-w-md mx-auto min-h-screen flex flex-col bg-gray-100">
+<body class="max-w-md mx-auto bg-gray-100 min-h-screen flex flex-col">
 
-    <header class="bg-molly p-3 text-white font-bold flex justify-between shadow">
+    <header class="bg-molly p-3 flex justify-between items-center text-white font-bold">
         <span>Molly.Online</span>
-        <span class="text-sm">0人 / 1枚</span>
+        <div class="text-sm">0人 / 1枚</div>
     </header>
 
-    <div class="aspect-square w-full bg-black">
+    <div class="camera-view">
         <img id="cam" src="https://192.168.11.28:8080">
     </div>
 
-    <div class="bg-white p-4 flex-grow shadow-inner">
+    <main class="bg-white p-4 flex-grow">
         <div class="flex justify-between items-center mb-6">
             <span class="text-3xl font-black text-green-600">0 MP</span>
             <div class="bg-gray-100 px-4 py-1 rounded-full text-sm font-bold">予約 0人</div>
         </div>
 
-        <button class="bg-molly w-full py-5 rounded-full text-white text-2xl font-black shadow-lg mb-8 active:scale-95 transition-all">
+        <button class="bg-molly w-full py-5 rounded-full text-white text-2xl font-black shadow-lg mb-8">
             ゲーム予約
         </button>
 
-        <div class="flex justify-between items-center">
-            <span class="text-green-600 font-bold text-sm">＞ 遊び方</span>
-            <div class="flex gap-2">
-                <button onclick="document.getElementById('cam').src='https://192.168.11.28:8080'" class="bg-molly text-white px-8 py-2 rounded-lg font-bold shadow">まえ</button>
-                <button onclick="document.getElementById('cam').src='https://192.168.11.9:8080'" class="bg-gray-400 text-white px-8 py-2 rounded-lg font-bold">よこ</button>
-            </div>
+        <div class="flex justify-end gap-2">
+            <button onclick="document.getElementById('cam').src='https://192.168.11.28:8080'" class="bg-molly text-white px-8 py-2 rounded-lg font-bold shadow">まえ</button>
+            <button onclick="document.getElementById('cam').src='https://192.168.11.9:8080'" class="bg-gray-400 text-white px-8 py-2 rounded-lg font-bold">よこ</button>
         </div>
-    </div>
+    </main>
 
-    <footer class="bg-gray-800 p-4 flex justify-between items-center">
+    <footer class="bg-gray-800 p-4 flex justify-between items-center mt-auto">
         <button class="bg-gray-500 text-white px-4 py-1 rounded text-xs">戻る</button>
         <button class="bg-orange-500 text-white px-6 py-1 rounded font-bold shadow">MP購入</button>
     </footer>
