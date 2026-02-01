@@ -3,61 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Molly Online Custom</title>
+    <title>Molly Online Clone</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .btn-green { background-color: #00a859; color: white; }
         .btn-orange { background-color: #ff9900; color: white; }
+        /* 埋め込み映像の表示エリア */
+        #camera-viewport { background-color: #000; aspect-ratio: 1 / 1; width: 100%; position: relative; }
+        #camera-source { width: 100%; height: 100%; object-fit: contain; }
     </style>
 </head>
-<body class="max-w-md mx-auto bg-gray-100 min-h-screen flex flex-col">
+<body class="max-w-md mx-auto bg-gray-50 min-h-screen flex flex-col">
 
-    <div class="btn-green p-3 flex justify-between items-center font-bold text-white">
+    <header class="btn-green p-3 flex justify-between items-center font-bold shadow-md">
         <span>Molly.Online</span>
-        <span><i class="fas fa-users"></i> 0</span>
-    </div>
+        <div class="flex gap-4 text-sm"><span>0人</span><span>1枚</span></div>
+    </header>
 
-    <div class="bg-black aspect-square w-full relative flex items-center justify-center text-white text-center p-4">
-        <div>
-            <p class="mb-4 text-sm font-bold text-yellow-400">【重要】</p>
-            <p class="text-xs leading-relaxed">
-                下の「まえ」「よこ」ボタンを押すと<br>
-                別ウィンドウでカメラ映像が開きます。<br>
-                （ブロックされたら「常に許可」を選択してください）
-            </p>
+    <div id="camera-viewport">
+        <img id="camera-source" src="https://192.168.11.28:8080" alt="Camera Stream">
+        
+        <div class="absolute top-2 right-2 bg-green-900/70 text-white text-[10px] p-2 border border-yellow-500">
+            動作確認用ブース
         </div>
     </div>
 
-    <div class="bg-white p-4 flex-grow">
-        <div class="flex justify-between items-center mb-6">
-            <span class="font-bold text-lg">1Play 0MP</span>
-            <div class="border px-4 py-1 rounded-full text-sm">予約人数 0</div>
+    <main class="p-4 flex-grow flex flex-col gap-6">
+        <div class="flex justify-between items-end">
+            <div>
+                <span class="font-bold text-sm">1Play</span>
+                <div class="text-2xl font-black text-green-600">0 <span class="text-sm">MP</span></div>
+            </div>
+            <div class="bg-white border px-4 py-1 rounded-full text-sm font-bold shadow-sm">
+                予約人数 0
+            </div>
         </div>
 
-        <button class="btn-green w-full py-4 rounded-full text-2xl font-black shadow-lg mb-8">
+        <button class="btn-green w-full py-4 rounded-full text-2xl font-black shadow-lg">
             ゲーム予約
         </button>
 
         <div class="flex justify-between items-center">
-            <span class="text-green-600 font-bold text-sm">＞ 遊び方を見る</span>
+            <span class="text-green-600 text-sm font-bold">＞ 遊び方を見る</span>
             <div class="flex gap-2">
-                <button onclick="openCam('https://192.168.11.28:8080')" class="btn-green px-6 py-2 rounded-lg font-bold">まえ</button>
-                <button onclick="openCam('https://192.168.11.9:8080')" class="bg-gray-400 text-white px-6 py-2 rounded-lg font-bold">よこ</button>
+                <button onclick="switchView('front', this)" class="btn-green px-6 py-2 rounded-lg font-bold shadow-md">まえ</button>
+                <button onclick="switchView('side', this)" class="bg-gray-300 text-white px-6 py-2 rounded-lg font-bold">よこ</button>
             </div>
         </div>
-    </div>
+    </main>
 
-    <div class="bg-gray-800 p-3 flex justify-between items-center mt-auto">
-        <button class="bg-gray-500 text-white px-4 py-1 rounded text-xs">戻る</button>
-        <button class="btn-orange px-6 py-1 rounded font-bold text-white">MP購入</button>
-    </div>
+    <footer class="bg-gray-800 p-3 flex justify-between items-center">
+        <button class="bg-gray-500 text-white px-3 py-1 rounded text-xs">戻る</button>
+        <div class="flex items-center gap-2 text-white">
+            <span class="text-xs">37 MP</span>
+            <button class="btn-orange px-4 py-1 rounded font-bold text-sm">購入</button>
+        </div>
+    </footer>
 
     <script>
-        function openCam(url) {
-            // 別ウィンドウで開く（これが一番ブロックされにくい）
-            window.open(url, 'camera_view', 'width=500,height=500,menubar=no,toolbar=no');
+        const camImg = document.getElementById('camera-source');
+
+        function switchView(view, btn) {
+            // 埋め込み先URLの切り替え
+            if (view === 'front') {
+                camImg.src = "https://192.168.11.28:8080";
+            } else {
+                camImg.src = "https://192.168.11.9:8080";
+            }
+
+            // ボタンの色の切り替え
+            const buttons = btn.parentElement.children;
+            buttons[0].className = "bg-gray-300 text-white px-6 py-2 rounded-lg font-bold";
+            buttons[1].className = "bg-gray-300 text-white px-6 py-2 rounded-lg font-bold";
+            btn.className = "btn-green px-6 py-2 rounded-lg font-bold shadow-md";
         }
     </script>
-
 </body>
 </html>
