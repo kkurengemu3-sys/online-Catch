@@ -3,190 +3,236 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Second Online - 固定ID・UI自動消去版</title>
+    <title>Second Online - Support System</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         body { margin: 0; background: #fff; font-family: "Arial Black", sans-serif; overflow: hidden; touch-action: manipulation; text-align: center; }
-        .header { background: #b2ebf2; padding: 10px 0; border-bottom: 2px solid #333; }
+        
+        /* ヘッダー */
+        .header { background: #b2ebf2; padding: 10px 0; border-bottom: 2px solid #333; position: relative; }
+        .logo-group { cursor: pointer; display: inline-block; }
         .logo-main { font-size: 24px; color: #000; margin: 0; line-height: 1; }
         .logo-sub { font-size: 10px; color: #000; margin: 5px 0 0 0; }
-        .video-container { width: 100%; aspect-ratio: 4 / 3; background: #000; display: flex; justify-content: center; align-items: center; position: relative; }
-        #camera-stream { width: 100%; height: 100%; object-fit: contain; }
-        #status-overlay { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); color: #fff; padding: 5px 10px; border-radius: 5px; font-size: 12px; pointer-events: none; z-index: 10; }
-        .info-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; }
-        .price { font-size: 24px; font-weight: bold; }
-        .camera-switch { display: flex; gap: 5px; }
-        .sw-btn { padding: 8px 20px; font-size: 18px; font-weight: bold; border: none; border-radius: 2px; color: #000; width: 70px; cursor: pointer; opacity: 0.4; }
-        .sw-btn.active { opacity: 1; outline: 3px solid #000; }
-        .controls { display: flex; justify-content: space-around; padding-top: 50px; }
-        .move-btn { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #000; background: #b2ebf2; display: flex; justify-content: center; align-items: center; font-size: 60px; color: #000; outline: none; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-        .move-btn.active { background: #ffeb3b; transform: scale(1.1); }
-        .move-btn.disabled { opacity: 0.1; pointer-events: none; filter: grayscale(1); }
+        
+        /* 通知ベル */
+        .bell-icon { position: absolute; right: 15px; top: 10px; font-size: 28px; cursor: pointer; z-index: 110; }
+        .bell-active { animation: ring 0.5s infinite; color: red; }
+        @keyframes ring { 0% {transform: rotate(0);} 25% {transform: rotate(15deg);} 75% {transform: rotate(-15deg);} 100% {transform: rotate(0);} }
 
-        /* 同期エリア */
-        .sync-box { position: fixed; bottom: 5px; right: 5px; background: #eee; padding: 8px; border: 2px solid #333; border-radius: 5px; font-size: 11px; z-index: 100; text-align: right; width: 180px; transition: opacity 0.5s; }
-        .sync-box.hidden { display: none; }
-        .sync-box input { width: 50px; padding: 3px; font-size: 14px; text-align: center; border: 1px solid #333; margin-bottom: 5px; }
-        .btn-sm { padding: 4px 8px; font-size: 11px; cursor: pointer; background: #fff; border: 1px solid #333; }
-        #my-id-status { font-weight: bold; color: #29b6f6; font-size: 14px; display: block; margin-bottom: 5px; }
+        /* お問い合わせ一覧モーダル */
+        #log-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; max-height: 70%; background: #fff; border-radius: 15px; border: 3px solid #333; z-index: 120; display: none; overflow-y: auto; padding: 15px; }
+        .log-item { background: #f0f0f0; margin-bottom: 10px; padding: 10px; border-radius: 10px; text-align: left; font-size: 14px; border-left: 5px solid #29b6f6; }
+        .log-time { font-size: 10px; color: #666; display: block; }
+
+        /* 既存のモーダル・UI */
+        #contact-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 350px; background: #b2f2f2; border-radius: 20px; border: 2px solid #333; z-index: 100; display: none; padding-bottom: 20px; }
+        .modal-header { position: relative; padding: 15px; font-size: 18px; }
+        .modal-close { position: absolute; right: 10px; top: 5px; font-size: 30px; cursor: pointer; }
+        .contact-option { display: block; width: 80%; margin: 8px auto; padding: 10px; background: #a6a6a6; border: none; border-radius: 30px; font-weight: bold; }
+        .contact-option.selected { background: #555; color: #fff; }
+        .send-btn { width: 80%; margin-top: 15px; padding: 12px; background: #29b6f6; color: #fff; border: none; border-radius: 30px; font-weight: bold; }
+
+        .video-container { width: 100%; aspect-ratio: 4 / 3; background: #000; position: relative; display: flex; justify-content: center; align-items: center; }
+        #camera-stream { width: 100%; height: 100%; object-fit: contain; }
+        #timer-display { position: absolute; top: 10px; right: 10px; background: rgba(255,0,0,0.8); color: #fff; padding: 5px 15px; border-radius: 20px; font-size: 20px; z-index: 10; display: none; }
+
+        .info-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; }
+        .cam-controls { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; }
+        .camera-switch { display: flex; gap: 5px; }
+        .sw-btn { padding: 8px 15px; font-weight: bold; border: none; width: 60px; opacity: 0.4; }
+        .sw-btn.active { opacity: 1; outline: 2px solid #333; }
+        .contact-btn { background: #29b6f6; border: none; padding: 5px 10px; font-size: 10px; font-weight: bold; width: 80px; }
+
+        .controls { display: flex; justify-content: space-around; padding-top: 40px; }
+        .move-btn { width: 110px; height: 110px; border-radius: 50%; border: 3px solid #000; background: #b2ebf2; font-size: 50px; outline: none; }
+        .move-btn.active { background: #ffeb3b; }
+        .move-btn.disabled { opacity: 0.1; pointer-events: none; }
+        
+        .sync-box { position: fixed; bottom: 5px; right: 5px; background: #eee; padding: 8px; border: 1px solid #333; font-size: 10px; z-index: 100; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1 class="logo-main">Second Online</h1>
-        <p class="logo-sub">セカンド・エンターテイメント</p>
+        <div class="logo-group" onclick="checkAdminClick()">
+            <h1 class="logo-main">Second Online</h1>
+            <p class="logo-sub">セカンド・エンターテイメント</p>
+        </div>
+        <div id="bell" class="bell-icon" onclick="toggleLogModal()">🔔</div>
     </div>
 
-    <div class="video-container">
-        <div id="status-overlay">ID未設定</div>
-        <img id="camera-stream" src="" alt="">
-    </div>
-
-    <div class="info-bar">
-        <div class="price">1Play100SP</div>
-        <div class="camera-switch">
-            <button id="sw-mae" class="sw-btn mae active" onclick="manualSwitch('mae')">まえ</button>
-            <button id="sw-yoko" class="sw-btn yoko" onclick="manualSwitch('yoko')">よこ</button>
+    <div id="log-modal">
+        <div class="modal-header">
+            お問い合わせ一覧
+            <span class="modal-close" onclick="toggleLogModal()">×</span>
+        </div>
+        <div id="log-container">
+            <p style="font-size:12px; color:#999;">履歴はありません</p>
         </div>
     </div>
 
-    <div class="controls">
-        <button id="btn-right" class="move-btn">➡</button>
-        <button id="btn-up" class="move-btn disabled">⬆</button>
+    <div id="contact-modal">
+        <div class="modal-header">お問い合わせ<span class="modal-close" onclick="closeContact()">×</span></div>
+        <button class="contact-option" onclick="selectOption(this)">初期位置</button>
+        <button class="contact-option" onclick="selectOption(this)">球の補充</button>
+        <button class="contact-option" onclick="selectOption(this)">並行移動</button>
+        <button class="contact-option" onclick="selectOption(this)">カメラの不具合</button>
+        <button class="contact-option" onclick="selectOption(this)">その他</button>
+        <button class="send-btn" onclick="sendContact()">送信</button>
+    </div>
+
+    <div class="video-container">
+        <div id="timer-display">10</div>
+        <img id="camera-stream" src="" alt="">
+    </div>
+
+    <div id="play-ui">
+        <div class="info-bar">
+            <div class="price">1Play100SP</div>
+            <div class="cam-controls">
+                <div class="camera-switch">
+                    <button id="sw-mae" class="sw-btn active" style="background:#29b6f6;" onclick="manualSwitch('mae')">まえ</button>
+                    <button id="sw-yoko" class="sw-btn" style="background:#bdbdbd;" onclick="manualSwitch('yoko')">よこ</button>
+                </div>
+                <button class="contact-btn" onclick="openContact()">お問い合わせ</button>
+            </div>
+        </div>
+        <div class="controls">
+            <button id="btn-right" class="move-btn">➡</button>
+            <button id="btn-up" class="move-btn disabled">⬆</button>
+        </div>
     </div>
 
     <div id="sync-panel" class="sync-box">
-        <span style="font-weight:bold;">▼ ID設定 (固定)</span>
-        <span id="my-id-status">未設定</span>
-        <input type="number" id="my-set-id" placeholder="3桁">
-        <button class="btn-sm" onclick="saveAndStartPeer()">ID保存・起動</button>
-        <hr style="margin:8px 0; border:0; border-top:1px solid #ccc;">
-        <span style="font-weight:bold;">▼ 相手に接続</span><br>
-        <input type="number" id="target-id" placeholder="3桁">
-        <button class="btn-sm" onclick="connectToPeer()">接続</button>
+        ID:<span id="my-id-status">---</span> <input type="number" id="my-set-id" style="width:30px"> <button onclick="saveAndStartPeer()">保存</button><br>
+        相手:<input type="number" id="target-id" style="width:30px"> <button onclick="connectToPeer()">接続</button>
     </div>
 
     <script>
-        const configs = {
-            mae: { ip: "192.168.11.28:8080", stream: "/video" },
-            yoko: { ip: "192.168.11.9:8080", stream: "/video" }
-        };
+        let selectedMsg = "";
+        let peer = null, conn = null, step = 1, timeLeft = 10, timerInterval = null;
+        let contactLogs = [];
 
-        let peer = null;
-        let conn = null;
-        let currentCam = 'mae';
-        let step = 1;
+        // --- お問い合わせ・通知一覧機能 ---
+        function openContact() { document.getElementById('contact-modal').style.display = 'block'; }
+        function closeContact() { document.getElementById('contact-modal').style.display = 'none'; }
+        function selectOption(btn) {
+            document.querySelectorAll('.contact-option').forEach(el => el.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedMsg = btn.innerText;
+        }
 
-        // 起動時に保存されたIDがあれば読み込む
-        window.onload = () => {
-            const savedId = localStorage.getItem('myCraneId');
-            if (savedId) {
-                document.getElementById('my-set-id').value = savedId;
-                startPeer(savedId);
+        function sendContact() {
+            if(!selectedMsg) return alert("内容を選択してください");
+            sendData('CONTACT', '', selectedMsg);
+            alert("送信完了");
+            closeContact();
+        }
+
+        function toggleLogModal() {
+            const modal = document.getElementById('log-modal');
+            const isVisible = modal.style.display === 'block';
+            modal.style.display = isVisible ? 'none' : 'block';
+            if(!isVisible) {
+                document.getElementById('bell').classList.remove('bell-active');
             }
-        };
-
-        function saveAndStartPeer() {
-            const chosenId = document.getElementById('my-set-id').value;
-            if (chosenId.length !== 3) return alert("3桁で入力してください");
-            localStorage.setItem('myCraneId', chosenId); // ブラウザに保存
-            startPeer(chosenId);
         }
 
-        function startPeer(id) {
-            if (peer) peer.destroy();
-            peer = new Peer(id);
-            peer.on('open', (openedId) => {
-                document.getElementById('my-id-status').innerText = "固定ID: " + openedId;
-                document.getElementById('status-overlay').innerText = "接続待機中...";
-            });
-            peer.on('error', (err) => { if(err.type === 'unavailable-id') alert("ID重複。変更してください"); });
-            peer.on('connection', (c) => {
-                conn = c;
-                setupConn();
-                hideSyncBox(); // 接続されたら消す
-            });
+        function receiveContact(msg) {
+            // ログに追加
+            const now = new Date();
+            const timeStr = `${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`;
+            contactLogs.unshift({ time: timeStr, msg: msg });
+            
+            updateLogUI();
+            
+            // ベルを点滅させる
+            document.getElementById('bell').classList.add('bell-active');
         }
 
-        function connectToPeer() {
-            if (!peer) return alert("先にIDを決定してください");
-            const tid = document.getElementById('target-id').value;
-            conn = peer.connect(tid);
-            setupConn();
-            conn.on('open', hideSyncBox); // 接続が成功したら消す
+        function updateLogUI() {
+            const container = document.getElementById('log-container');
+            if (contactLogs.length === 0) return;
+            
+            container.innerHTML = contactLogs.map(log => `
+                <div class="log-item">
+                    <span class="log-time">${log.time}</span>
+                    <strong>${log.msg}</strong>
+                </div>
+            `).join('');
         }
 
-        function hideSyncBox() {
-            document.getElementById('sync-panel').classList.add('hidden');
-            document.getElementById('status-overlay').innerText = "同期完了";
+        // --- 通信・タイマー・カメラ (既存ロジック) ---
+        function startTimer() {
+            timeLeft = 10;
+            const disp = document.getElementById('timer-display');
+            disp.style.display = 'block';
+            timerInterval = setInterval(() => {
+                timeLeft--; disp.innerText = timeLeft;
+                sendData('SYSTEM', '', 'TIMER:' + timeLeft);
+                if(timeLeft <= 0) { stopTimer(); forceTransition(); }
+            }, 1000);
         }
+        function stopTimer() { clearInterval(timerInterval); timerInterval = null; document.getElementById('timer-display').style.display = 'none'; }
+        function forceTransition() { if(step === 1) handleEnd.call(document.getElementById('btn-right')); }
 
         function setupConn() {
             conn.on('data', (data) => {
+                if(data.btn === 'CONTACT') receiveContact(data.action);
+                if(data.btn === 'SYSTEM' && data.action.startsWith('TIMER:')) {
+                    const t = data.action.split(':')[1];
+                    document.getElementById('timer-display').innerText = t;
+                    document.getElementById('timer-display').style.display = t > 0 ? 'block' : 'none';
+                }
                 const btn = document.getElementById(data.btnId);
-                if (data.action === 'PUSH' && btn) btn.classList.add('active');
-                if (data.action === 'RELEASE' && btn) btn.classList.remove('active');
-                if (data.cam) switchCamera(data.cam);
-                document.getElementById('status-overlay').innerText = `遠隔: ${data.btn} ${data.action}`;
+                if(data.action === 'PUSH' && btn) btn.classList.add('active');
+                if(data.action === 'RELEASE' && btn) btn.classList.remove('active');
+                if(data.cam) switchCamera(data.cam);
             });
         }
 
-        function sendData(btnName, btnId, action) {
-            if (conn && conn.open) {
-                conn.send({ btn: btnName, btnId: btnId, action: action, cam: currentCam });
-            }
-        }
+        function sendData(btn, id, action) { if(conn && conn.open) conn.send({btn: btn, btnId: id, action: action, cam: currentCam}); }
 
+        function startPeer(id) {
+            if(peer) peer.destroy();
+            peer = new Peer(id);
+            peer.on('open', (id) => document.getElementById('my-id-status').innerText = id);
+            peer.on('connection', (c) => { conn = c; setupConn(); document.getElementById('sync-panel').classList.add('hidden'); });
+        }
+        function saveAndStartPeer() { const id = document.getElementById('my-set-id').value; localStorage.setItem('myCraneId', id); startPeer(id); }
+        function connectToPeer() { const tid = document.getElementById('target-id').value; conn = peer.connect(tid); setupConn(); conn.on('open', () => document.getElementById('sync-panel').classList.add('hidden')); }
+
+        let currentCam = 'mae';
         function switchCamera(target) {
             currentCam = target;
             document.getElementById('sw-mae').classList.toggle('active', target === 'mae');
             document.getElementById('sw-yoko').classList.toggle('active', target === 'yoko');
-            document.getElementById('camera-stream').src = `http://${configs[target].ip}${configs[target].stream}`;
+            document.getElementById('camera-stream').src = `http://${target === 'mae' ? '192.168.11.28' : '192.168.11.9'}:8080/video`;
         }
-
-        function manualSwitch(target) {
-            switchCamera(target);
-            sendData('システム', '', 'CAM_SW:' + target);
-        }
+        function manualSwitch(target) { switchCamera(target); sendData('SYSTEM', '', 'SW:'+target); }
 
         function handleStart(e) {
-            e.preventDefault();
-            this.classList.add('active');
-            sendData(this.id === 'btn-right' ? '右' : '奥', this.id, 'PUSH');
+            e.preventDefault(); this.classList.add('active');
+            sendData(this.id==='btn-right'?'右':'奥', this.id, 'PUSH');
+            if(this.id === 'btn-right' && step === 1) startTimer();
         }
-
         function handleEnd() {
             this.classList.remove('active');
-            sendData(this.id === 'btn-right' ? '右' : '奥', this.id, 'RELEASE');
-
-            if (this.id === 'btn-right' && step === 1) {
-                step = 2;
-                document.getElementById('btn-right').classList.add('disabled');
-                document.getElementById('btn-up').classList.remove('disabled');
-                switchCamera('yoko');
-                sendData('システム', '', 'AUTO_CAM:YOKO');
-            } else if (this.id === 'btn-up' && step === 2) {
-                step = 3;
-                document.getElementById('btn-up').classList.add('disabled');
-                switchCamera('mae');
-                sendData('システム', '', 'AUTO_CAM:MAE');
-                // リロードするとIDが消えるため、今回はリロードせず状態だけ戻す
-                setTimeout(() => {
-                    step = 1;
-                    document.getElementById('btn-right').classList.remove('disabled');
-                }, 5000);
-            }
+            sendData(this.id==='btn-right'?'右':'奥', this.id, 'RELEASE');
+            if(this.id === 'btn-right' && step === 1) { step = 2; document.getElementById('btn-right').classList.add('disabled'); document.getElementById('btn-up').classList.remove('disabled'); switchCamera('yoko'); }
+            else if(this.id === 'btn-up' && step === 2) { step = 3; stopTimer(); document.getElementById('btn-up').classList.add('disabled'); switchCamera('mae'); setTimeout(()=>{step=1; document.getElementById('btn-right').classList.remove('disabled');}, 5000); }
         }
 
         [document.getElementById('btn-right'), document.getElementById('btn-up')].forEach(btn => {
-            btn.addEventListener('mousedown', handleStart);
-            btn.addEventListener('touchstart', handleStart, {passive: false});
-            btn.addEventListener('mouseup', handleEnd);
-            btn.addEventListener('touchend', handleEnd);
+            btn.addEventListener('touchstart', handleStart); btn.addEventListener('touchend', handleEnd);
         });
 
-        switchCamera('mae');
+        window.onload = () => {
+            const sid = localStorage.getItem('myCraneId');
+            if(sid) { document.getElementById('my-set-id').value = sid; startPeer(sid); }
+            switchCamera('mae');
+        };
     </script>
 </body>
 </html>
